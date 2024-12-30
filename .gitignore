@@ -1,0 +1,6 @@
+*.o
+*.bundle
+*.dSYM
+Makefile
+*.log
+gst_behavior/gst_behavior
