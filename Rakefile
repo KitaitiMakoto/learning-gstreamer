@@ -57,6 +57,23 @@ file SAMPLE_AUDIO do |t|
 end
 CLEAN.include SAMPLE_AUDIO
 
+EXPECTED_AUDIO = "expected-audio.wav"
+file EXPECTED_AUDIO do |t|
+  duration = 1
+
+  samplesperbuffer = 1024
+  rate = 44100
+  channels = 1
+
+  num_samples_per_channel = rate * duration
+  num_samples = num_samples_per_channel * channels
+  num_buffers = (num_samples.to_f / samplesperbuffer).ceil
+
+  sh "gst-launch-1.0 audiotestsrc num-buffers=#{num_buffers} ! audioconvert ! audio/x-raw,format=F32LE,channels=1,rate=16000 ! wavenc ! filesink location=#{t.name}"
+  sh "ffprobe", t.name
+end
+CLEAN.include EXPECTED_AUDIO
+
 rule ".o" => ".c" do |t|
   sh "gcc -c -o #{t.name} #{t.source}"
 end
