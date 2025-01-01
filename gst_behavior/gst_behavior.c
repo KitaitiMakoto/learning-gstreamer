@@ -8,6 +8,31 @@ static gboolean
 bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
   g_print("bus_call: %d\n", bus_call_count++);
+
+  g_print("message type: %s\n", gst_message_type_get_name(GST_MESSAGE_TYPE(msg)));
+
+  switch (GST_MESSAGE_TYPE(msg)) {
+    case GST_MESSAGE_EOS:
+      g_print("End of stream\n");
+      g_main_loop_quit((GMainLoop *)data);
+      break;
+    case GST_MESSAGE_ERROR: {
+      gchar *debug;
+      GError *error;
+
+      gst_message_parse_error(msg, &error, &debug);
+      g_free(debug);
+
+      g_printerr("Error: %s\n", error->message);
+      g_error_free(error);
+
+      g_main_loop_quit((GMainLoop *)data);
+      break;
+    }
+    default:
+      break;
+  }
+
   return TRUE;
 }
 
