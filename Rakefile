@@ -74,6 +74,19 @@ file EXPECTED_AUDIO do |t|
 end
 CLEAN.include EXPECTED_AUDIO
 
+namespace :filesrc do
+  task test: "filesrc/filesrc" do |t|
+    sh t.source
+  end
+
+  file "filesrc/filesrc" => "filesrc/filesrc.c" do |t|
+    cd "filesrc" do
+      sh "gcc -Wall #{t.source.pathmap('%f')} -o #{t.name.pathmap('%f')} $(pkg-config --cflags --libs gstreamer-1.0) $(pkg-config --cflags --libs gstreamer-app-1.0) $(pkg-config --cflags --libs gstreamer-audio-1.0)"
+    end
+  end
+  CLEAN.include "filesrc/filesrc"
+end
+
 rule ".o" => ".c" do |t|
   sh "gcc -c -o #{t.name} #{t.source}"
 end
