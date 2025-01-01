@@ -99,5 +99,7 @@ main(int argc, char *argv[])
   g_source_remove(bus_watch_id);
   g_main_loop_unref(loop);
 
+  g_print("num-buffers property: %d, new-sample callback count: %d\n", 5, on_new_sample_count);
+
   return 0;
 }
