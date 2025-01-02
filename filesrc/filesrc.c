@@ -43,6 +43,12 @@ on_new_sample(GstElement *sink, gpointer data)
   return GST_FLOW_OK;
 }
 
+void
+on_eos(GstElement *appsink, gpointer user_data)
+{
+  g_print("on_eos\n");
+}
+
 int main(int argc, char *argv[])
 {
   GMainLoop *loop;
@@ -78,13 +84,17 @@ int main(int argc, char *argv[])
   g_object_set(G_OBJECT(source), "location", filename, NULL);
 
   caps = gst_caps_new_simple("audio/x-raw",
-                             "format", G_TYPE_STRING, "F32LE",
+                             "format", G_TYPE_STRING, "S16LE",
                              NULL);
   g_object_set(G_OBJECT(sink),
                "caps", caps,
                "emit-signals", TRUE,
                NULL);
   g_signal_connect(sink, "new-sample", G_CALLBACK(on_new_sample), NULL);
+  g_signal_connect(sink, "eos", G_CALLBACK(on_eos), NULL);
+  gboolean eos;
+  g_object_get(G_OBJECT(sink), "eos", &eos, NULL);
+  g_print("appsink eos property: %s\n", eos ? "true" : "false");
 
   gst_bin_add_many(GST_BIN(pipeline), source, parse, convert, sink, NULL);
   gst_element_link_many(source, parse, convert, sink, NULL);
@@ -103,6 +113,8 @@ int main(int argc, char *argv[])
 
   g_print("bus_call_count: %d\n", bus_call_count);
   g_print("on_new_sample_count: %d\n", on_new_sample_count);
+
+  g_print("How to catch EOS in appsink?\n");
 
   return 0;
 }
