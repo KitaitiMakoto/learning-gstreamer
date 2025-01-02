@@ -17,6 +17,8 @@ Code to learn GStreamer behavior on handling audio file.
 
 * How to catch EOS from appsink?
   * -> Call `gst_app_sink_pull_sample()` in `new-sample` callback
+* Is `on_new_sample()` called as many times as the number of samples?
+  * -> No. `on_new_sample()` is called 26 times but the audio file has 45056 samples.
 * Can `gst_pad_add_probe` register an event on buffer which includes multiple samples?
 
 extract_samples
