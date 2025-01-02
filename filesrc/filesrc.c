@@ -1,4 +1,5 @@
 #include <gst/gst.h>
+#include <gst/app/gstappsink.h>
 #include <glib.h>
 
 static int bus_call_count = 0;
@@ -39,6 +40,8 @@ static GstFlowReturn
 on_new_sample(GstElement *sink, gpointer data)
 {
   g_print("on_new_sample: %d\n", on_new_sample_count++);
+
+  GstSample *sample = gst_app_sink_pull_sample(GST_APP_SINK(sink));
 
   return GST_FLOW_OK;
 }
@@ -92,9 +95,6 @@ int main(int argc, char *argv[])
                NULL);
   g_signal_connect(sink, "new-sample", G_CALLBACK(on_new_sample), NULL);
   g_signal_connect(sink, "eos", G_CALLBACK(on_eos), NULL);
-  gboolean eos;
-  g_object_get(G_OBJECT(sink), "eos", &eos, NULL);
-  g_print("appsink eos property: %s\n", eos ? "true" : "false");
 
   gst_bin_add_many(GST_BIN(pipeline), source, parse, convert, sink, NULL);
   gst_element_link_many(source, parse, convert, sink, NULL);
