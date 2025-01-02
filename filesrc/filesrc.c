@@ -2,6 +2,7 @@
 #include <glib.h>
 
 static int bus_call_count = 0;
+static int on_new_sample_count = 0;
 
 static gboolean
 bus_call(GstBus *bus, GstMessage *msg, gpointer data)
@@ -34,12 +35,21 @@ bus_call(GstBus *bus, GstMessage *msg, gpointer data)
   return TRUE;
 }
 
+static GstFlowReturn
+on_new_sample(GstElement *sink, gpointer data)
+{
+  g_print("on_new_sample: %d\n", on_new_sample_count++);
+
+  return GST_FLOW_OK;
+}
+
 int main(int argc, char *argv[])
 {
   GMainLoop *loop;
 
-  GstElement *pipeline, *source, *sink;
+  GstElement *pipeline, *source, *parse, *convert, *sink;
   GstBus *bus;
+  GstCaps *caps;
   guint bus_watch_id;
 
   if (argc != 2) {
@@ -56,7 +66,9 @@ int main(int argc, char *argv[])
 
   pipeline = gst_pipeline_new("watch_filesrc");
   source = gst_element_factory_make("filesrc", NULL);
-  sink = gst_element_factory_make("fakesink", NULL);
+  parse = gst_element_factory_make("wavparse", NULL);
+  convert = gst_element_factory_make("audioconvert", NULL);
+  sink = gst_element_factory_make("appsink", NULL);
 
   if (!pipeline || !source || !sink) {
     g_printerr("Not all elements could be created.\n");
@@ -65,8 +77,17 @@ int main(int argc, char *argv[])
 
   g_object_set(G_OBJECT(source), "location", filename, NULL);
 
-  gst_bin_add_many(GST_BIN(pipeline), source, sink, NULL);
-  gst_element_link(source, sink);
+  caps = gst_caps_new_simple("audio/x-raw",
+                             "format", G_TYPE_STRING, "F32LE",
+                             NULL);
+  g_object_set(G_OBJECT(sink),
+               "caps", caps,
+               "emit-signals", TRUE,
+               NULL);
+  g_signal_connect(sink, "new-sample", G_CALLBACK(on_new_sample), NULL);
+
+  gst_bin_add_many(GST_BIN(pipeline), source, parse, convert, sink, NULL);
+  gst_element_link_many(source, parse, convert, sink, NULL);
 
   bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
   bus_watch_id = gst_bus_add_watch(bus, bus_call, loop);
@@ -81,6 +102,7 @@ int main(int argc, char *argv[])
   g_main_loop_unref(loop);
 
   g_print("bus_call_count: %d\n", bus_call_count);
+  g_print("on_new_sample_count: %d\n", on_new_sample_count);
 
   return 0;
 }
