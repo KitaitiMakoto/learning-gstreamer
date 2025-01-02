@@ -1,5 +1,6 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
+#include <gst/audio/audio-info.h>
 #include <glib.h>
 
 static int bus_call_count = 0;
@@ -39,9 +40,68 @@ bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 static GstFlowReturn
 on_new_sample(GstElement *sink, gpointer data)
 {
+  GstSample *sample;
+  GstBuffer *buffer;
+  GstMapInfo map_info;
+  GstCaps *caps;
+  GstAudioInfo *audio_info;
+  const GstAudioFormatInfo *audio_finfo;
+  GstClockTime duration;
+
   g_print("on_new_sample: %d\n", on_new_sample_count++);
 
-  GstSample *sample = gst_app_sink_pull_sample(GST_APP_SINK(sink));
+  sample = gst_app_sink_pull_sample(GST_APP_SINK(sink));
+  if (sample == NULL) {
+    g_print("sample is NULL\n");
+    return GST_FLOW_ERROR;
+  }
+
+  caps = gst_sample_get_caps(sample);
+  if (caps == NULL) {
+    g_print("caps is NULL\n");
+    return GST_FLOW_ERROR;
+  }
+
+  audio_info = gst_audio_info_new_from_caps(caps);
+  if (audio_info == NULL) {
+    g_print("audio_info is NULL\n");
+    return GST_FLOW_ERROR;
+  }
+  g_print("channels: %d, flags: %d\n", audio_info->channels, audio_info->flags);
+  audio_finfo = audio_info->finfo;
+  if (audio_finfo == NULL) {
+    g_print("audio_finfo is NULL\n");
+    return GST_FLOW_ERROR;
+  }
+  g_print("audio format: %s, width: %d, depth: %d, unpack_format: %s, has unpack_func: %s\n",
+          gst_audio_format_to_string(audio_finfo->format),
+          audio_finfo->width,
+          audio_finfo->depth,
+          gst_audio_format_to_string(audio_finfo->unpack_format),
+          audio_finfo->unpack_func ? "true" : "false");
+
+  buffer = gst_sample_get_buffer(sample);
+  if (buffer == NULL) {
+    g_print("buffer is NULL\n");
+    return GST_FLOW_ERROR;
+  }
+  duration = buffer->duration;
+  if (duration == GST_CLOCK_TIME_NONE) {
+    g_print("duration is GST_CLOCK_TIME_NONE\n");
+  } else {
+    duration = duration / audio_info->channels;
+    g_print("buffer duration: %llums\n", duration / 1000 / 1000);
+  }
+
+  const gboolean result = gst_buffer_map(buffer, &map_info, GST_MAP_READ);
+  if (!result) {
+    g_print("gst_buffer_map failed\n");
+    return GST_FLOW_ERROR;
+  }
+  g_print("map size: %lu bytes\n", map_info.size);
+  g_print("%lu samples? Seems equivalent to sample rate\n", map_info.size / audio_finfo->width);
+
+  gst_sample_unref(sample);
 
   return GST_FLOW_OK;
 }
