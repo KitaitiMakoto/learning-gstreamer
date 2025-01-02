@@ -76,7 +76,7 @@ CLEAN.include EXPECTED_AUDIO
 
 namespace :filesrc do
   task test: "filesrc/filesrc" do |t|
-    sh t.source
+    sh t.source, SAMPLE_AUDIO
   end
 
   file "filesrc/filesrc" => "filesrc/filesrc.c" do |t|
