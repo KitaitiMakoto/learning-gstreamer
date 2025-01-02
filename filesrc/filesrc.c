@@ -114,7 +114,5 @@ int main(int argc, char *argv[])
   g_print("bus_call_count: %d\n", bus_call_count);
   g_print("on_new_sample_count: %d\n", on_new_sample_count);
 
-  g_print("How to catch EOS in appsink?\n");
-
   return 0;
 }
