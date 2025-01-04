@@ -151,6 +151,8 @@ int main(int argc, char *argv[])
 
   g_object_set(G_OBJECT(queue),
                "min-threshold-buffers", 199,
+               "min-threshold-bytes", 10485759,
+               "min-threshold-time", 999999999,
                NULL);
   g_signal_connect(queue, "overrun", G_CALLBACK(queue_callback), "overrun");
   g_signal_connect(queue, "pushing", G_CALLBACK(queue_callback), "pushing");
