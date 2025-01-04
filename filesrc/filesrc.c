@@ -6,6 +6,7 @@
 static int bus_call_count = 0;
 static int on_new_sample_count = 0;
 static GstClockTime total_duration = 0;
+static gsize total_samples = 0;
 
 static gboolean
 bus_call(GstBus *bus, GstMessage *msg, gpointer data)
@@ -101,7 +102,9 @@ on_new_sample(GstElement *sink, gpointer data)
     return GST_FLOW_ERROR;
   }
   g_print("map size: %lu bytes\n", map_info.size);
-  g_print("%lu samples?\n", map_info.size / (audio_finfo->width / 8));
+  gsize n_samples = map_info.size / (audio_finfo->width / 8) / audio_info->channels;
+  g_print("%lu samples?\n", n_samples);
+  total_samples += n_samples;
 
   gst_sample_unref(sample);
 
@@ -174,6 +177,7 @@ int main(int argc, char *argv[])
   g_main_loop_unref(loop);
 
   g_print("bus_call_count: %d\n", bus_call_count);
+  g_print("total samples should be %d, actually %lu\n", 45056, total_samples);
   g_print("on_new_sample_count: %d\n", on_new_sample_count);
   g_print("total_duration: %llus\n", total_duration / 1000 / 1000);
 
