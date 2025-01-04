@@ -27,6 +27,7 @@ Code to learn GStreamer behavior on handling audio file.
       > All rendered samples will be put in a queue so that the application can pull samples at its own rate.
       
       Note that it uses plural ("samples").
+  * The number of samples is calculated by `gsize n_samples = map_info.size / (audio_finfo->width / 8) / audio_info->channels;` in single `new-samples` callback.
 * What's the difference between the combination of `new-sample` signal and `gst_app_sink_pull_sample()`, and `pull-sample` action?
   * The former handles single sample and the latter does multiple samples at a time?
 * Can `gst_pad_add_probe` register an event on buffer which includes multiple samples?
