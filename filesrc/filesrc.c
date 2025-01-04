@@ -44,6 +44,7 @@ on_new_sample(GstElement *sink, gpointer data)
 {
   GstSample *sample;
   GstBuffer *buffer;
+  GstBufferList *buffer_list;
   GstMapInfo map_info;
   GstCaps *caps;
   GstStructure *structure;
@@ -116,6 +117,9 @@ on_new_sample(GstElement *sink, gpointer data)
   gsize n_samples = map_info.size / (audio_finfo->width / 8) / audio_info->channels;
   g_print("%lu samples\n", n_samples);
   total_samples += n_samples;
+
+  buffer_list = gst_sample_get_buffer_list(sample);
+  g_print("buffer_list: %s\n", buffer_list ? "non-NULL" : "NULL");
 
   gst_sample_unref(sample);
 
