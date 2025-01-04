@@ -5,6 +5,7 @@
 
 static int bus_call_count = 0;
 static int on_new_sample_count = 0;
+static GstClockTime total_duration = 0;
 
 static gboolean
 bus_call(GstBus *bus, GstMessage *msg, gpointer data)
@@ -90,6 +91,7 @@ on_new_sample(GstElement *sink, gpointer data)
     g_print("duration is GST_CLOCK_TIME_NONE\n");
   } else {
     duration = duration / audio_info->channels;
+    total_duration += duration;
     g_print("buffer duration: %llums\n", duration / 1000 / 1000);
   }
 
@@ -173,6 +175,7 @@ int main(int argc, char *argv[])
 
   g_print("bus_call_count: %d\n", bus_call_count);
   g_print("on_new_sample_count: %d\n", on_new_sample_count);
+  g_print("total_duration: %llus\n", total_duration / 1000 / 1000);
 
   return 0;
 }
