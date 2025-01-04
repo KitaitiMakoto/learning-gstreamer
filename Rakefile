@@ -53,7 +53,7 @@ file SAMPLE_AUDIO do |t|
   num_buffers = (num_samples.to_f / samplesperbuffer).ceil
 
   sh "gst-launch-1.0 audiotestsrc num-buffers=#{num_buffers} ! audioconvert ! audio/x-raw,format=S16LE,channels=2 ! wavenc ! filesink location=#{t.name}"
-  sh "ffprobe", t.name
+  show_audio_info t.name
 end
 CLEAN.include SAMPLE_AUDIO
 
@@ -70,7 +70,7 @@ file EXPECTED_AUDIO do |t|
   num_buffers = (num_samples.to_f / samplesperbuffer).ceil
 
   sh "gst-launch-1.0 audiotestsrc num-buffers=#{num_buffers} ! audioconvert ! audio/x-raw,format=F32LE,channels=1,rate=16000 ! wavenc ! filesink location=#{t.name}"
-  sh "ffprobe", t.name
+  show_audio_info t.name
 end
 CLEAN.include EXPECTED_AUDIO
 
@@ -93,3 +93,18 @@ end
 CLEAN.include "**/*.o"
 
 CLEAN.include "**/*.dSYM"
+
+namespace :audio_info do
+  [SAMPLE_AUDIO, EXPECTED_AUDIO].each do |audio|
+    task audio => audio do |t|
+      show_audio_info t.source
+    end
+  end
+end
+
+require "wavefile"
+def show_audio_info(file)
+  sh "ffprobe", file
+  reader = WaveFile::Reader.new(file)
+  pp reader
+end
