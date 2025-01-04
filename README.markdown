@@ -39,3 +39,10 @@ extract_samples
 ---------------
 
 Attempt to receive samples from audio source and expose it as MemoryView.
+
+* Can append buffer to a sample?
+  * When we need audio data of 1 second, a buffer in a `Gst::Sample` is too short.
+  * sometimes we need single `Gst::Buffer`, though we can represent a long term buffer by an array of `Gst::Sample`.
+  * Can buffer size be set if a `Gst::Sample` cannot expand its buffer.
+    * `buffer_list` features can be used? What's it?
+      * It seems intended to be used internally.
