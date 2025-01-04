@@ -99,7 +99,7 @@ on_new_sample(GstElement *sink, gpointer data)
     return GST_FLOW_ERROR;
   }
   g_print("map size: %lu bytes\n", map_info.size);
-  g_print("%lu samples? Seems equivalent to sample rate\n", map_info.size / audio_finfo->width);
+  g_print("%lu samples? Seems equivalent to sample rate\n", map_info.size / (audio_finfo->width / 8));
 
   gst_sample_unref(sample);
 
