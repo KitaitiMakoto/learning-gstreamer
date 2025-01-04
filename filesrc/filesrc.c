@@ -46,11 +46,12 @@ on_new_sample(GstElement *sink, gpointer data)
   GstBuffer *buffer;
   GstMapInfo map_info;
   GstCaps *caps;
+  GstStructure *structure;
   GstAudioInfo *audio_info;
   const GstAudioFormatInfo *audio_finfo;
   GstClockTime duration;
 
-  g_print("on_new_sample: %d\n", on_new_sample_count++);
+  g_print("=== on_new_sample: %d ===\n", on_new_sample_count++);
 
   sample = gst_app_sink_pull_sample(GST_APP_SINK(sink));
   if (sample == NULL) {
@@ -63,6 +64,16 @@ on_new_sample(GstElement *sink, gpointer data)
     g_print("caps is NULL\n");
     return GST_FLOW_ERROR;
   }
+  g_print("caps: %s\n", gst_caps_to_string(caps));
+  guint n_structures = gst_caps_get_size(caps);
+  g_print("caps structures should be 1, actually %d\n", n_structures);
+  structure = gst_caps_get_structure(caps, 0);
+  if (structure == NULL) {
+    g_print("structure is NULL\n");
+    return GST_FLOW_ERROR;
+  }
+  const gchar *name = gst_structure_get_name(structure);
+  g_print("structure name: %s\n", name);
 
   audio_info = gst_audio_info_new_from_caps(caps);
   if (audio_info == NULL) {
@@ -103,7 +114,7 @@ on_new_sample(GstElement *sink, gpointer data)
   }
   g_print("map size: %lu bytes\n", map_info.size);
   gsize n_samples = map_info.size / (audio_finfo->width / 8) / audio_info->channels;
-  g_print("%lu samples?\n", n_samples);
+  g_print("%lu samples\n", n_samples);
   total_samples += n_samples;
 
   gst_sample_unref(sample);
