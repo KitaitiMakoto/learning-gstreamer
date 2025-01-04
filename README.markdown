@@ -35,6 +35,14 @@ Code to learn GStreamer behavior on handling audio file.
 
 [pull-sample]: https://gstreamer.freedesktop.org/documentation/app/appsink.html?gi-language=c#appsink-page
 
+queue
+-----
+
+Code to learn GStreamer behavior of queue element.
+
+* Using queue, can reduce `new-sample` call of appsink?
+  * No.
+
 extract_samples
 ---------------
 
