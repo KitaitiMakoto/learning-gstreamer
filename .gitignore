@@ -5,5 +5,6 @@ Makefile
 *.log
 gst_behavior/gst_behavior
 filesrc/filesrc
+queue/queue
 one-second-audio.wav
 expected-audio.wav

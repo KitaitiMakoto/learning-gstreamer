@@ -87,6 +87,19 @@ namespace :filesrc do
   CLEAN.include "filesrc/filesrc"
 end
 
+namespace :queue do
+  task test: ["queue/queue", SAMPLE_AUDIO] do |t|
+    sh *t.sources
+  end
+
+  file "queue/queue" => "queue/queue.c" do |t|
+    cd "queue" do
+      sh "gcc -Wall #{t.source.pathmap('%f')} -o #{t.name.pathmap('%f')} $(pkg-config --cflags --libs gstreamer-1.0) $(pkg-config --cflags --libs gstreamer-app-1.0) $(pkg-config --cflags --libs gstreamer-audio-1.0)"
+    end
+  end
+  CLEAN.include "queue/queue"
+end
+
 rule ".o" => ".c" do |t|
   sh "gcc -c -o #{t.name} #{t.source}"
 end
