@@ -100,6 +100,23 @@ namespace :queue do
   CLEAN.include "queue/queue"
 end
 
+namespace :buffer_list do
+  task test: ["buffer_list/buffer_list", SAMPLE_AUDIO] do |t|
+    sh t.source, t.sources[1]
+  end
+
+  file "buffer_list/buffer_list" => "buffer_list/buffer_list.c" do |t|
+    cd "buffer_list" do
+      sh "gcc -Wall #{t.source.pathmap('%f')} -o #{t.name.pathmap('%f')} $(pkg-config --cflags --libs gstreamer-1.0) $(pkg-config --cflags --libs gstreamer-app-1.0) $(pkg-config --cflags --libs gstreamer-audio-1.0)"
+    end
+  end
+  CLEAN.include "buffer_list/buffer_list"
+
+  task ruby: ["buffer_list/create-buffer-list.rb", SAMPLE_AUDIO] do |t|
+    ruby t.source, t.sources[1]
+  end
+end
+
 rule ".o" => ".c" do |t|
   sh "gcc -c -o #{t.name} #{t.source}"
 end
